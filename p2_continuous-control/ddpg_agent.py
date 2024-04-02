@@ -9,23 +9,19 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
-BUFFER_SIZE = int(1e5)   # replay buffer size
-BATCH_SIZE = 128         # minibatch size
-GAMMA = 0.99             # discount factor
-TAU = 1e-3               # for soft update of target parameters
-LR_ACTOR = 1e-4          # learning rate of the actor 
-LR_CRITIC = 1e-3         # learning rate of the critic
-WEIGHT_DECAY = 0         # L2 weight decay
-LEARN_EVERY = 16         # how often to learn and update weights
-UPDATE_TARGET_EVERY = 1  # how often to update target network w soft update
-MODEL_LAYER1_SIZE = 256
-MODEL_LAYER2_SIZE = 256
+BUFFER_SIZE = int(1e5)  # replay buffer size
+BATCH_SIZE = 128        # minibatch size
+GAMMA = 0.99            # discount factor
+TAU = 1e-3              # for soft update of target parameters
+LR_ACTOR = 1e-4         # learning rate of the actor 
+LR_CRITIC = 1e-3        # learning rate of the critic
+WEIGHT_DECAY = 0        # L2 weight decay
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Agent():
     """Interacts with and learns from the environment."""
-
+    
     def __init__(self, state_size, action_size, random_seed):
         """Initialize an Agent object.
         
@@ -38,9 +34,6 @@ class Agent():
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
-        
-        self.t_step = 0                  # Initialize time step (for updating every LEARN_EVERY steps)
-        self.l_step = 0                  # init learning step (for updating target weights UPDATE_TARGET_EVERY learn steps)
 
         # Actor Network (w/ Target Network)
         self.actor_local = Actor(state_size, action_size, random_seed).to(device)
@@ -57,26 +50,19 @@ class Agent():
 
         # Replay memory
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
-        
+    
     def step(self, state, action, reward, next_state, done):
-        # Save experience in replay memory
+        """Save experience in replay memory, and use random sample from buffer to learn."""
+        # Save experience / reward
         self.memory.add(state, action, reward, next_state, done)
-        
-        # Learn every LEARN_EVERY time steps.
-        self.t_step = (self.t_step + 1) % LEARN_EVERY
-        if self.t_step == 0:
-            # If enough samples are available in memory, get random subset and learn
-            if len(self.memory) > BATCH_SIZE:
-                experiences = self.memory.sample()
-                self._learn(experiences, GAMMA)
-            
-    def get_action(self, state, add_noise=True):
-        """Returns actions for given state as per current policy.
-        
-        Params
-        ======
-            state (array_like): current state
-        """
+
+        # Learn, if enough samples are available in memory
+        if len(self.memory) > BATCH_SIZE:
+            experiences = self.memory.sample()
+            self.learn(experiences, GAMMA)
+
+    def act(self, state, add_noise=True):
+        """Returns actions for given state as per current policy."""
         state = torch.from_numpy(state).float().to(device)
         self.actor_local.eval()
         with torch.no_grad():
@@ -85,25 +71,11 @@ class Agent():
         if add_noise:
             action += self.noise.sample()
         return np.clip(action, -1, 1)
-        
-    def save_policy(self, filename):
-        """Save agent's policy to file
-        Params
-        ======
-            filename (string): name of file to store policy info
-        """
-        self.dqn_current.save_to_file(filename)
-        
-        
-    def load_policy(self, filename):
-        """Load agent's policy from file
-        Params
-        ======
-            filename (string): name of file which stores policy info
-        """
-        self.dqn_current.load_from_file(filename)
 
-    def _learn(self, experiences, gamma):
+    def reset(self):
+        self.noise.reset()
+
+    def learn(self, experiences, gamma):
         """Update policy and value parameters using given batch of experience tuples.
         Q_targets = r + γ * critic_target(next_state, actor_target(next_state))
         where:
@@ -141,18 +113,17 @@ class Agent():
         self.actor_optimizer.step()
 
         # ----------------------- update target networks ----------------------- #
-        self.l_step = (self.l_step + 1) % UPDATE_TARGET_EVERY
-        if self.l_step == 0:
-            self.soft_update(self.critic_local, self.critic_target, TAU)
-            self.soft_update(self.actor_local, self.actor_target, TAU)        
+        self.soft_update(self.critic_local, self.critic_target, TAU)
+        self.soft_update(self.actor_local, self.actor_target, TAU)                     
 
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.
         θ_target = τ*θ_local + (1 - τ)*θ_target
+
         Params
         ======
-            local_model (PyTorch model): weights will be copied from
-            target_model (PyTorch model): weights will be copied to
+            local_model: PyTorch model (weights will be copied from)
+            target_model: PyTorch model (weights will be copied to)
             tau (float): interpolation parameter 
         """
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
@@ -187,13 +158,11 @@ class ReplayBuffer:
         """Initialize a ReplayBuffer object.
         Params
         ======
-            action_size (int): dimension of each action
             buffer_size (int): maximum size of buffer
             batch_size (int): size of each training batch
-            seed (int): random seed
         """
         self.action_size = action_size
-        self.memory = deque(maxlen=buffer_size)  
+        self.memory = deque(maxlen=buffer_size)  # internal memory (deque)
         self.batch_size = batch_size
         self.experience = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
         self.seed = random.seed(seed)
@@ -208,11 +177,11 @@ class ReplayBuffer:
         experiences = random.sample(self.memory, k=self.batch_size)
 
         states = torch.from_numpy(np.vstack([e.state for e in experiences if e is not None])).float().to(device)
-        actions = torch.from_numpy(np.vstack([e.action for e in experiences if e is not None])).long().to(device)
+        actions = torch.from_numpy(np.vstack([e.action for e in experiences if e is not None])).float().to(device)
         rewards = torch.from_numpy(np.vstack([e.reward for e in experiences if e is not None])).float().to(device)
         next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None])).float().to(device)
         dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
-  
+
         return (states, actions, rewards, next_states, dones)
 
     def __len__(self):
