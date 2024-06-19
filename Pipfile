@@ -19,6 +19,8 @@ ipykernel = "*"
 gym = "==0.9.6"
 Pillow = ">=4.2.1"
 PyYAML = "*"
+seaborn = "*"
+torchvision = "*"
 
 [dev-packages]
 
