@@ -146,14 +146,22 @@ class Agent():
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
             
-    def save_policy(self):
-        torch.save(self.actor_local.state_dict(), 'checkpoint_actor.pth')
-        torch.save(self.critic_local.state_dict(), 'checkpoint_critic.pth')
+    def save_policy(self, prefix):
+        actor_model_name = f'{prefix}_checkpoint_actor.pth'
+        critic_model_name = f'{prefix}_checkpoint_critic.pth'
+        print(f'Saving model params as: {actor_model_name} and {critic_model_name}')
+        torch.save(self.actor_local.state_dict(), actor_model_name)
+        torch.save(self.critic_local.state_dict(), critic_model_name)
+        
+    def load_policy(self, prefix):
+        actor_model_name = f'{prefix}_checkpoint_actor.pth'
+        critic_model_name = f'{prefix}_checkpoint_critic.pth'
+        print(f'Loading model params from: {actor_model_name} and {critic_model_name}')
 
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
 
-    def __init__(self, size, seed, mu=0., theta=0.25, sigma=0.5):
+    def __init__(self, size, seed, mu=0., theta=0.125, sigma=0.25):
         """Initialize parameters and noise process."""
         self.mu = mu * np.ones(size)
         self.theta = theta
