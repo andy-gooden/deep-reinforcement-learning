@@ -51,7 +51,6 @@ class Agent():
         self.noise = OUNoise((num_agents, action_size), random_seed)
         print("NOISE: {}".format(self.noise))
         
-
         # Replay memory
         self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
     
@@ -62,6 +61,7 @@ class Agent():
         for state, action, reward, next_state, done in zip(states, actions, rewards, next_states, dones):
             self.memory.add(state, action, reward, next_state, done)
         self.step_number = (self.step_number + 1) % LEARN_EVERY
+        self.step_number = 0  # TODO: remove this
 
         if self.step_number == 0:
             # Learn, if enough samples are available in memory
@@ -146,7 +146,7 @@ class Agent():
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
             
-    def save_policy(self, prefix):
+    def save_policy(self, prefix="final"):
         actor_model_name = f'{prefix}_checkpoint_actor.pth'
         critic_model_name = f'{prefix}_checkpoint_critic.pth'
         print(f'Saving model params as: {actor_model_name} and {critic_model_name}')
@@ -161,7 +161,7 @@ class Agent():
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
 
-    def __init__(self, size, seed, mu=0., theta=0.125, sigma=0.25):
+    def __init__(self, size, seed, mu=0., theta=0.15, sigma=0.25):
         """Initialize parameters and noise process."""
         self.mu = mu * np.ones(size)
         self.theta = theta
