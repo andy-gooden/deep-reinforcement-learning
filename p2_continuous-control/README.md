@@ -70,4 +70,4 @@ The three main files are:
 Run `Continuous_Control.ipynb` to train your own agent!
 
 ### Attributions
-This code was based off starter code provided in the [Udacity deep-reinforcement-learning repo](https://github.com/udacity/deep-reinforcement-learning/tree/master/p2_continuous-control)
+This code was based off starter code provided in the DDPG Pendulum example in the [Udacity deep-reinforcement-learning repo](https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-pendulum)
