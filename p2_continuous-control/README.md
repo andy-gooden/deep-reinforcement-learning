@@ -6,14 +6,16 @@
 
 # Project 2: Continuous Control
 
-### Project Details 
+## Project Details 
 
 For this project, we worked with the [Reacher](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#reacher) environment.
 
 ![Trained Agent][image1]
 
-In this environment, a double-jointed arm can move to target locations. A reward of +0.1 is provided for each step that the agent's hand is in the goal location. Thus, the goal of the agent is to maintain its position at the target location for as many time steps as possible.
+#### Rewards
+In this environment, a double-jointed arm can move to target locations. A reward of +0.1 is provided for each time step that the agent's hand is in the goal location. Thus, the goal of the agent is to maintain its position at the target location for as many time steps as possible.
 
+#### State and Action Space
 The observation space consists of 33 variables corresponding to position, rotation, velocity, and angular velocities of the arm. Each action is a vector with four numbers, corresponding to torque applicable to two joints. Every entry in the action vector should be a number between -1 and 1.
 
 For this project, two separate versions of the Unity environment were provided:
@@ -32,7 +34,7 @@ To solve the environment with 20 agents, the agents must get an average score of
 
 The environment is considered solved, when the average (over 100 episodes) of those average scores is at least +30. 
 
-### Getting Started
+## Getting Started
 #### Setting Up Your Python Environment
 This code was developed using Python 3.6.15
 
@@ -61,7 +63,7 @@ environment from one of the links below:
 
 2. Place the file in the DRLND GitHub repository, in the `p2_continuous-control/` folder, and unzip (or decompress) the file. 
 
-### Instructions
+## Instructions
 The three main files are:
 1. `ddpg_agent.py` - this file implements the Agent with an Actor and Critic and has the bulk of the hyperparameters to set
 2. `model.py` - this file implements the neural networks for the Actor and Critic
@@ -69,5 +71,5 @@ The three main files are:
 
 Run `Continuous_Control.ipynb` to train your own agent!
 
-### Attributions
+## Attributions
 This code was based off starter code provided in the DDPG Pendulum example in the [Udacity deep-reinforcement-learning repo](https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-pendulum)
