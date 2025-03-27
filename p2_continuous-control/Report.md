@@ -86,7 +86,7 @@ Episode 131	Average Score: 37.86	Score Variance: 1.45<br/>
 
 Environment solved in 131 episodes!	Average Score: 37.86	Score Variance: 1.45<br/>
 
-Saving model params as: final_2746317214_checkpoint_actor.pth and final_2746317214_checkpoint_critic.pth<br/>
+Saving model params as: `final_2746317214_checkpoint_actor.pth` and `final_2746317214_checkpoint_critic.pth`<br/>
 total train time:  2093.6735937595367 seconds
 
 ## Ideas for Future Work
